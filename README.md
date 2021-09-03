@@ -1,3 +1,3 @@
 # BMEN207 Repository README
-Hi!:
+Hi!
 This README is for BMEN 207 at Texas A&M
