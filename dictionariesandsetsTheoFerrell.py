@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Apr 13 07:56:36 2020
-
-@author: john.hanks
-"""
 # Implement the coding tasks or answer the questions below in this format:
 # 1: What is your name?
 # JH>> John 
