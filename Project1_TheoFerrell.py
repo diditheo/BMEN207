@@ -16,7 +16,7 @@ from operator import truediv
 #Changable Inputs ---------------------------------------------------------------
 FILE_LOC = "C:/Users/didit/Desktop/BMEN 207/PPG_data/Data_"
 START_FILE = 6
-END_FILE = 6
+END_FILE = 60
 
 THRESHOLD_MAG = .1 #10% threshold from mean
 SAMPLE_RATE = 100 #samples/sec
@@ -135,38 +135,55 @@ t = None
 p = 500
 w = 10
 hr_conversion = 100 * 60
-red_peaks = []
-red_troughs = []
-ir_peaks = []
-ir_troughs = []
 red_AC = []
 ir_AC = []
 R = []
 SpO2 = []
 
 
-red_trough = -(red - np.mean(red))
-redPEAKS, _ = find_peaks(red, height=h, threshold=t, prominence=p, width=w)
+red_trough    = -(red - np.mean(red))
+redPEAKS, _   = find_peaks(red, height=h, threshold=t, prominence=p, width=w)
 redTROUGHS, _ = find_peaks(red_trough, height=h, threshold=t, prominence=p, width=w)
-delta_red = np.diff(redPEAKS)
+delta_red     = np.diff(redPEAKS)
 avg_delta_red = np.mean(delta_red)
-BPM_red = (1/avg_delta_red) * hr_conversion
+BPM_red       = (1/avg_delta_red) * hr_conversion
 
-ir_trough = -(ir - np.mean(ir))
-irPEAKS, _ = find_peaks(ir, height=h, threshold=t, prominence=p, width=w)
+ir_trough    = -(ir - np.mean(ir))
+irPEAKS, _   = find_peaks(ir, height=h, threshold=t, prominence=p, width=w)
 irTROUGHS, _ = find_peaks(ir_trough, height=h, threshold=t, prominence=p, width=w)
-delta_ir = np.diff(irPEAKS)
+delta_ir     = np.diff(irPEAKS)
 avg_delta_ir = np.mean(delta_ir)
-BPM_ir = (1/avg_delta_ir) * hr_conversion
+BPM_ir       = (1/avg_delta_ir) * hr_conversion
 
 BPM = (BPM_red + BPM_ir) / 2
 
-for i in range(0, len(ir[irPEAKS])):
-    red_peaks.append(red[redPEAKS[i]])
-    red_troughs.append(red[redTROUGHS[i]])
-    ir_peaks.append(ir[irPEAKS[i]])
-    ir_troughs.append(ir[irTROUGHS[i]])
-    
+red_peaks   = [red[redPEAKS[i]] for i in range(0,len(red[redPEAKS]))]
+# print(redPEAKS)
+red_troughs = [red[redTROUGHS[i]] for i in range(0, len(red[redTROUGHS]))]
+ir_peaks    = [ir[irPEAKS[i]] for i in range(0,len(ir[irPEAKS]))]
+ir_troughs  = [ir[irTROUGHS[i]] for i in range(0, len(ir[irTROUGHS]))]
+
+
+
+red_peaks = np.zeros(len(data))
+# if red_peaks[i] 
+for i in range(len(data)):
+    if redPEAKS[i] == i:
+        red_peaks[i] = red[redPEAKS[i]]
+
+
+print(red_peaks)
+
+
+
+
+
+
+
+
+
+
+   
 red_AC = list(set(red_peaks) - set(red_troughs))
 red_DC = red_troughs
 
@@ -175,11 +192,18 @@ ir_DC = ir_troughs
 
 R_red = list(map(truediv, red_AC, red_DC)) #red_AC / red_DC
 R_ir = list(map(truediv, ir_AC, ir_DC))    #ir_AC / ir_DC
-R = list(map(truediv, R_red, R_ir))
-SpO2 = 129 - R * 32
-data['SpO2'] = SpO2
+R = list(map(truediv, R_red, R_ir))        #R_red / R_ir
+R_reverse = [1 / R for R in R]             #1/R
+SpO2 = [(129 - R_reverse * 32) for R_reverse in R_reverse]         #129- R*32    
+# print(len(SpO2))
+# print(len(data))
+# for i in range(0, len(SpO2)):
+#     if SpO2[i] > 100:
+#         SpO2 = np.delete(SpO2, i)
+#     if SpO2[i] < 80:
+#         SpO2 = np.delete(SpO2, i)
 
-
+# print(SpO2)
 """
 #_____________________________PLOT________________________________________
 plt.plot(redPEAKS, red[redPEAKS], 'o', linewidth=10, markersize=5)
@@ -187,8 +211,8 @@ plt.plot(redTROUGHS, red[redTROUGHS], '*', linewidth=10, markersize=5)
 # plt.plot(irPEAKS, ir[irPEAKS], 'o', linewidth=10, markersize=5)
 # plt.plot(irTROUGHS, ir[irTROUGHS], '*', linewidth=10, markersize=5)
 plt.ylabel('ADC Counts')
-plt.xlabel('t(ms)')
-plt.title('Heart Rate by Peak Detection (Red of Data_6.csv)')
+plt.xlabel('time (ms)')
+plt.title('Heart Rate by Peak Detection (Red of Data 6-80.csv)')
 # plt.xlim(200,1400)
 # plt.ylim(183000, 187000)
 plt.show()
